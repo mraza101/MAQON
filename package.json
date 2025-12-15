@@ -9,16 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
+    "@vercel/node": "^5.5.15",
+    "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "lucide-react": "^0.561.0",
     "react-router-dom": "^7.10.1",
-    "resend": "^6.6.0",
-    "@vercel/node": "^5.5.15",
-    "@supabase/supabase-js": "^2.87.1",
-    "@netlify/functions": "^2.12.2"
+    "resend": "^6.6.0"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
