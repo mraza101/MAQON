@@ -145,7 +145,7 @@ export const Contact = () => {
         utm_params: utmParams
       };
 
-      const response = await fetch('/.netlify/functions/lead', {
+      const response = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
