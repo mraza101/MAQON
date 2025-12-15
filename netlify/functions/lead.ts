@@ -2,9 +2,10 @@ import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
+// Supabase client: must use service role key to satisfy RLS insert policy
 const supabase = createClient(
-  process.env.SUPABASE_URL ?? '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? '');
@@ -169,6 +170,12 @@ const handler: Handler = async (event) => {
     const requestType = request_type || 'Diagnostic';
     const utm = typeof utm_params === 'object' && utm_params ? utm_params : {};
 
+    // Safe env diagnostics (no secrets logged)
+    console.log('[lead] Supabase envs present', {
+      hasUrl: !!process.env.SUPABASE_URL,
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
+
     const { error: dbError } = await supabase.from('leads').insert([
       {
         full_name,
@@ -192,11 +199,20 @@ const handler: Handler = async (event) => {
     ]);
 
     if (dbError) {
-      console.error('Supabase insert error', dbError);
+      console.error('Supabase insert error', {
+        message: dbError.message,
+        details: dbError.details,
+        hint: dbError.hint,
+        code: dbError.code
+      });
       return {
         statusCode: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ok: false, error: 'Database error' })
+        body: JSON.stringify({
+          ok: false,
+          error: 'Database error',
+          details: dbError.message
+        })
       };
     }
 
