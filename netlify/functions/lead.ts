@@ -2,10 +2,24 @@ import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
+// Helper: Decode JWT role without logging the token
+const jwtRole = (token?: string): string | null => {
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return 'unparseable';
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+    return payload.role || null;
+  } catch {
+    return 'unparseable';
+  }
+};
+
 // Supabase client: must use service role key to satisfy RLS insert policy
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
 );
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? '');
@@ -171,9 +185,12 @@ const handler: Handler = async (event) => {
     const utm = typeof utm_params === 'object' && utm_params ? utm_params : {};
 
     // Safe env diagnostics (no secrets logged)
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     console.log('[lead] Supabase envs present', {
       hasUrl: !!process.env.SUPABASE_URL,
-      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      hasServiceRoleKey: !!serviceKey,
+      serviceKeyLen: serviceKey?.length || 0,
+      serviceRole: jwtRole(serviceKey)
     });
 
     const { error: dbError } = await supabase.from('leads').insert([
@@ -211,12 +228,13 @@ const handler: Handler = async (event) => {
         body: JSON.stringify({
           ok: false,
           error: 'Database error',
-          details: dbError.message
+          details: dbError.message,
+          code: dbError.code
         })
       };
     }
 
-    const notifyTo = process.env.NOTIFY_EMAIL ?? 'muhammad@maqoncapital.com';
+    const notifyTo = process.env.LEAD_NOTIFY_EMAIL ?? process.env.NOTIFY_EMAIL ?? 'muhammad@maqoncapital.com';
     const fromEmail = process.env.FROM_EMAIL ?? 'MAQON <noreply@maqoncapital.com>';
     const submittedAt = new Date().toISOString();
 
