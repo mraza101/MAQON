@@ -21,14 +21,15 @@ export const Button = ({
 }: ButtonProps) => {
   
   // Base styles: Transition, Focus, Disabled states
-  const baseStyles = "inline-flex items-center justify-center rounded-sm font-bold tracking-[0.2em] uppercase transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-maqon-void disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
+  const baseStyles = "inline-flex items-center justify-center rounded-sm font-bold tracking-[0.2em] uppercase transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-maqon-void disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
   
-  // Variants
+  // Variants — light mode: avoid hover:bg-white on primary (text is --color-void ≈ white in light theme).
+  // Dark mode hovers unchanged via dark: overrides.
   const variants = {
-    primary: "bg-maqon-platinum text-maqon-void hover:bg-white hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-px focus-visible:ring-maqon-gold",
+    primary: "bg-maqon-platinum text-maqon-void hover:-translate-y-px hover:bg-[#020617] hover:text-[#F8FAFC] hover:shadow-[0_0_20px_rgba(2,6,23,0.35)] dark:hover:bg-white dark:hover:text-maqon-void dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] focus-visible:ring-maqon-gold",
     secondary: "bg-maqon-teal text-white hover:bg-maqon-tealDim hover:shadow-[0_0_20px_rgba(0,95,107,0.4)] hover:-translate-y-px focus-visible:ring-maqon-gold shadow-lg shadow-maqon-teal/20",
-    outline: "border border-maqon-border text-maqon-platinum bg-transparent hover:border-maqon-platinum hover:bg-maqon-platinum/5 hover:-translate-y-px focus-visible:ring-maqon-gold backdrop-blur-sm",
-    ghost: "text-maqon-platinum hover:bg-maqon-platinum/10 hover:text-white focus-visible:ring-maqon-gold",
+    outline: "border border-maqon-border text-maqon-platinum bg-transparent hover:-translate-y-px hover:border-maqon-platinum hover:bg-maqon-platinum hover:text-[#F8FAFC] dark:hover:bg-maqon-platinum/5 dark:hover:text-maqon-platinum focus-visible:ring-maqon-gold backdrop-blur-sm",
+    ghost: "text-maqon-platinum hover:bg-maqon-platinum/10 hover:text-maqon-platinum dark:hover:text-white focus-visible:ring-maqon-gold",
     link: "text-maqon-platinum hover:text-maqon-gold underline-offset-4 hover:underline p-0 h-auto font-normal tracking-normal normal-case",
   };
 
