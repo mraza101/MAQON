@@ -1,26 +1,33 @@
 import { Handler } from '@netlify/functions';
-import { createClient } from '@supabase/supabase-js';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 
-// Helper: Decode JWT role without logging the token
-const jwtRole = (token?: string): string | null => {
-  if (!token) return null;
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return 'unparseable';
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
-    return payload.role || null;
-  } catch {
-    return 'unparseable';
-  }
+/** Parsed Firebase service account JSON (Console download uses snake_case keys). */
+type FirebaseServiceAccountFile = {
+  project_id?: string;
+  client_email?: string;
+  private_key?: string;
 };
 
-// Supabase client: must use service role key to satisfy RLS insert policy
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-);
+function getDb() {
+  if (!getApps().length) {
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (!raw || raw.trim() === '') {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is not set');
+    }
+    const keyFile = JSON.parse(raw) as FirebaseServiceAccountFile;
+    initializeApp({
+      credential: cert({
+        projectId: keyFile.project_id,
+        clientEmail: keyFile.client_email,
+        privateKey: keyFile.private_key?.replace(/\\n/g, '\n'),
+      }),
+      projectId: keyFile.project_id || process.env.FIREBASE_PROJECT_ID || 'maqon-93fa2',
+    });
+  }
+  return getFirestore();
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? '');
 
@@ -185,23 +192,21 @@ const handler: Handler = async (event) => {
     const utm = typeof utm_params === 'object' && utm_params ? utm_params : {};
 
     // Safe env diagnostics (no secrets logged)
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    console.log('[lead] Supabase envs present', {
-      hasUrl: !!process.env.SUPABASE_URL,
-      hasServiceRoleKey: !!serviceKey,
-      serviceKeyLen: serviceKey?.length || 0,
-      serviceRole: jwtRole(serviceKey)
+    console.log('[lead] Firebase envs present', {
+      hasServiceAccountJson: !!process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim(),
+      projectId: process.env.FIREBASE_PROJECT_ID || 'maqon-93fa2'
     });
 
-    const { error: dbError } = await supabase.from('leads').insert([
-      {
+    try {
+      const db = getDb();
+      await db.collection('leads').add({
         full_name,
         work_email,
-        phone_whatsapp,
+        phone_whatsapp: phone_whatsapp || null,
         company_name,
         current_stage,
         primary_goal,
-        deck_or_website,
+        deck_or_website: deck_or_website || null,
         request_type: requestType,
         source_page: source_page || null,
         utm_source: utm.utm_source || null,
@@ -211,25 +216,21 @@ const handler: Handler = async (event) => {
         utm_content: utm.utm_content || null,
         ip,
         user_agent: userAgent,
-        status: 'new'
-      }
-    ]);
-
-    if (dbError) {
-      console.error('Supabase insert error', {
-        message: dbError.message,
-        details: dbError.details,
-        hint: dbError.hint,
-        code: dbError.code
+        status: 'new',
+        created_at: FieldValue.serverTimestamp()
       });
+    } catch (dbError: unknown) {
+      const message = dbError instanceof Error ? dbError.message : String(dbError);
+      const code = dbError && typeof dbError === 'object' && 'code' in dbError ? String((dbError as { code?: unknown }).code) : undefined;
+      console.error('Firestore insert error', { message, code });
       return {
         statusCode: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: false,
           error: 'Database error',
-          details: dbError.message,
-          code: dbError.code
+          details: message,
+          code
         })
       };
     }
@@ -303,6 +304,42 @@ const handler: Handler = async (event) => {
       };
     }
 
+    const confirmationHtml = `
+      <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #0f172a; line-height: 1.65; max-width: 560px;">
+        <p style="margin: 0 0 16px; font-size: 16px;">Hi ${full_name},</p>
+        <p style="margin: 0 0 16px; font-size: 16px; color: #334155;">Thank you for reaching out to MAQON.</p>
+        <p style="margin: 0 0 16px; font-size: 16px; color: #334155;">We've received your diagnostic request and one of our partners will review it personally within 24 hours.</p>
+        <p style="margin: 0 0 28px; font-size: 16px; color: #334155;">In the meantime, if you have any additional context to share, simply reply to this email.</p>
+        <p style="margin: 0 0 4px; font-size: 14px; color: #0f172a; font-weight: 600; letter-spacing: 0.02em;">— The MAQON Team</p>
+        <p style="margin: 0; font-size: 14px;"><a href="https://maqoncapital.com" style="color: #005F6B; text-decoration: none; font-weight: 600;">maqoncapital.com</a></p>
+      </div>
+    `;
+
+    const confirmationText = [
+      `Hi ${full_name},`,
+      '',
+      'Thank you for reaching out to MAQON.',
+      '',
+      "We've received your diagnostic request and one of our partners will review it personally within 24 hours.",
+      '',
+      'In the meantime, if you have any additional context to share, simply reply to this email.',
+      '',
+      '— The MAQON Team',
+      'maqoncapital.com'
+    ].join('\n');
+
+    const { error: confirmationError } = await resend.emails.send({
+      from: 'MAQON <noreply@maqoncapital.com>',
+      to: [work_email],
+      subject: "We've received your diagnostic request — MAQON",
+      html: confirmationHtml,
+      text: confirmationText
+    });
+
+    if (confirmationError) {
+      console.error('Resend confirmation error', confirmationError);
+    }
+
     return {
       statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
@@ -319,4 +356,3 @@ const handler: Handler = async (event) => {
 };
 
 export { handler };
-
