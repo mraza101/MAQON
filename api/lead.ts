@@ -122,6 +122,8 @@ function parseBody(req: VercelRequest): Record<string, unknown> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const origin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined;
 
+  console.log('[api/lead] hit', req.method, req.url ?? '', new Date().toISOString());
+
   if (req.method === 'OPTIONS') {
     applyCors(res, origin);
     return res.status(204).end();
