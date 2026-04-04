@@ -22,7 +22,7 @@ export const About = () => {
        <section className="py-20 border-t border-maqon-border bg-maqon-obsidian transition-colors duration-500">
          <div className="container mx-auto px-6">
            <h2 className="text-3xl font-serif text-maqon-platinum mb-16 text-center transition-colors">The Partnership</h2>
-           <div className="grid md:grid-cols-3 gap-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
              {siteConfig.team.map((member) => (
                <div key={member.name} className="group">
                  <div className="bg-maqon-void rounded-sm p-10 h-full border border-maqon-border hover:border-maqon-platinum/20 transition-all hover:-translate-y-1 flex flex-col">

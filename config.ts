@@ -40,7 +40,7 @@ export const siteConfig = {
   team: [
     {
       name: "Muhammad Raza",
-      role: "Managing Partner",
+      role: "Partner",
       identity: "VC/PE Operator. Fundraising clarity.",
       bio: "Operator with deep experience in financial modeling and growth infrastructure. Builds the defensible models and decks that pass IC scrutiny.",
       bullets: [
@@ -52,7 +52,7 @@ export const siteConfig = {
     },
     {
       name: "Hasnain Ayaz",
-      role: "Executive Partner",
+      role: "Partner",
       identity: "Execution Engine. Funnel Ops + AI.",
       bio: "The engine builder. Specializes in turning strategy into deployed funnels, CRM architectures, and automated AI lead workflows.",
       bullets: [
@@ -61,18 +61,6 @@ export const siteConfig = {
         "Supported growth strategy for 8-figure D2C portfolio"
       ],
       linkedin: "https://www.linkedin.com/in/hasnain-ayaz-322177175/"
-    },
-    {
-      name: "Finena",
-      role: "Partner (Germany)",
-      identity: "Relationships + Capital Access (DACH).",
-      bio: "Based in Frankfurt. Bridges the gap to European family offices and UHNW networks. Focused on access and relationship building.",
-      bullets: [
-        "Bridges DACH-based family offices to vetted opportunities",
-        "Introduces only when a company is 'investor-ready'",
-        "Focus: long-term trust and high-integrity deal flow"
-      ],
-      linkedin: "#"
     }
   ],
   services: [
