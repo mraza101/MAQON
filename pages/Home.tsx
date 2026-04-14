@@ -224,7 +224,7 @@ const Hero = () => {
                   <TrustLogo name="camal" className="lowercase font-serif italic" />
                   <div className="group relative flex flex-col items-center justify-center opacity-70 hover:opacity-100 transition-all duration-500 cursor-default grayscale hover:grayscale-0 text-center">
                     <svg
-                      className="mx-auto mb-1 h-3 w-14 text-maqon-teal"
+                      className="mx-auto mb-1 h-3 w-14 text-maqon-platinum/55 group-hover:text-maqon-teal transition-colors duration-500"
                       viewBox="0 0 56 12"
                       fill="none"
                       aria-hidden="true"
@@ -244,10 +244,10 @@ const Hero = () => {
                         opacity="0.45"
                       />
                     </svg>
-                    <span className="text-sm md:text-base font-bold tracking-tight text-maqon-platinum drop-shadow-sm font-sans">
-                      Hutchines <span className="font-semibold text-maqon-platinum/75">Builders</span>
+                    <span className="text-sm md:text-base font-bold tracking-tight text-maqon-platinum/80 drop-shadow-sm font-sans">
+                      Hutchines <span className="font-semibold text-maqon-platinum/70">Builders</span>
                     </span>
-                    <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.28em] text-maqon-teal/85">
+                    <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.28em] text-maqon-platinum/50 group-hover:text-maqon-teal/90 transition-colors duration-500">
                       Apologia Aire
                     </span>
                   </div>
