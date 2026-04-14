@@ -222,7 +222,35 @@ const Hero = () => {
                   <TrustLogo name="IJK Capital" className="font-serif tracking-tight" />
                   <TrustLogo name="NEXEA" className="font-sans !font-normal tracking-[0.3em]" />
                   <TrustLogo name="camal" className="lowercase font-serif italic" />
-                  <TrustLogo name="Mega Foods" className="font-sans font-bold text-maqon-platinum/80" />
+                  <div className="group relative flex flex-col items-center justify-center opacity-70 hover:opacity-100 transition-all duration-500 cursor-default grayscale hover:grayscale-0 text-center">
+                    <svg
+                      className="mx-auto mb-1 h-3 w-14 text-maqon-teal"
+                      viewBox="0 0 56 12"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 8c6-6 10-6 16 0s10 6 16 0 10-6 16 0"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        opacity="0.95"
+                      />
+                      <path
+                        d="M4 10c6-4 10-4 16 0s10 4 16 0 10-4 16 0"
+                        stroke="currentColor"
+                        strokeWidth="0.75"
+                        strokeLinecap="round"
+                        opacity="0.45"
+                      />
+                    </svg>
+                    <span className="text-sm md:text-base font-bold tracking-tight text-maqon-platinum drop-shadow-sm font-sans">
+                      Hutchines <span className="font-semibold text-maqon-platinum/75">Builders</span>
+                    </span>
+                    <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.28em] text-maqon-teal/85">
+                      Apologia Aire
+                    </span>
+                  </div>
                   <TrustLogo name="IMM Group" className="font-mono font-bold tracking-widest" />
                   <TrustLogo name="ABLE C&C" className="font-serif font-semibold" />
                </div>
